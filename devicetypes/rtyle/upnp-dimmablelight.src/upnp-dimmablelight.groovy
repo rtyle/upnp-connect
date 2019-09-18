@@ -210,7 +210,6 @@ void notifyDimming(notification) {
 	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
 	String value = xml.property.LoadLevelStatus.text()
 	if (value) {
-		String value = xml.property.LoadLevelStatus.text()
 		log.info "notifyDimming: sendEvent name: 'level', value: $value"
 		sendEvent name: 'level', value: value
 	}
