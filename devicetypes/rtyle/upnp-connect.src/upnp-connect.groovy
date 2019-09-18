@@ -54,6 +54,10 @@ void parse(description) {
 	}
 }
 
+boolean hasChild(String udn) {
+	getChildDevice udn
+}
+
 void add(String namespace, String name, String udn, String hubId, String description, String networkAddress, String deviceAddress, String ssdpPath, String label) {
 	physicalgraph.app.DeviceWrapper child = getChildDevice udn
 	if (!child) {
