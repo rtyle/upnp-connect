@@ -27,5 +27,7 @@ for your Device Handlers. Otherwise, one can just copy and paste this code.
 
 One should deploy the **UPnP (Connect)** SmartApp to initiate discovery and device handler creation.
 If there are many devices, creation for some may fail.
-Try again by opening the SmartApp settings and clicking Save.
+Initiate discovery again by opening the SmartApp settings and clicking Save.
 Repeat until all your devices are supported.
+
+You can remove any of the created devices but they will be recreated the next time you initiate **UPnP (Connect)** discovery.
