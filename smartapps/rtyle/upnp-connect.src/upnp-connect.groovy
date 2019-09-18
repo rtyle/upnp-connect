@@ -129,21 +129,24 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 		log.debug("ssdpDiscovered: ignore $urn")
 		return
 	}
+
+	def child = getChildDevice discovered.mac
+
 	String udn = discovered.ssdpUSN.uuid	// udn
 	if (rememberedDevice."$udn") {
 		def remembered = rememberedDevice."$udn"
 		if (false
 				|| remembered.networkAddress	!= discovered.networkAddress
 				|| remembered.deviceAddress		!= discovered.deviceAddress) {
-			String mac = remembered.mac
-			log.debug "ssdpDiscovered: (getChildDevice $mac).update $udn $discovered.networkAddress $discovered.deviceAddress"
-			def child = getChildDevice mac
-			child?.update udn, discovered.networkAddress, discovered.deviceAddress
-			remembered.networkAddress	= discovered.networkAddress
-			remembered.deviceAddress	= discovered.deviceAddress
+            if (child) {
+				log.debug "ssdpDiscovered: (getChildDevice $discovered.mac).update $udn $discovered.networkAddress $discovered.deviceAddress"
+				child.update udn, discovered.networkAddress, discovered.deviceAddress
+            }
 		}
-	} else {
-		rememberedDevice."$udn" = discovered;
+	}
+	rememberedDevice."$udn" = discovered;
+
+	if (!(child?.hasChild(udn))) {
 		String target = decodeNetworkAddress(discovered.networkAddress) + ':' + decodeDeviceAddress(discovered.deviceAddress)
 		log.debug "ssdpDiscovered: GET http://$target${discovered.ssdpPath}"
 		sendHubCommand new physicalgraph.device.HubAction(
