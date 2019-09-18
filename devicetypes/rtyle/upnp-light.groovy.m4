@@ -1,4 +1,5 @@
 // vim: ts=4:sw=4
+changequote(`«', `»')dnl
 /**
  *	UPnP Type()Light
  *
@@ -310,6 +311,7 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 		String sid = headers.sid.split(':')[1]
 		updateDataValue "sid$service", sid
 		unschedule "upnpSubscribe$service"	// success
+		refresh()
 		Integer timeout = headers.timeout.split('-')[1].toInteger()
 		if (120 > timeout) {
 			timeout /= 2

@@ -1,0 +1,3 @@
+#!/bin/bash
+m4 -D Type=Binary	upnp-light.groovy.m4 > upnp-binarylight.src/upnp-binarylight.groovy
+m4 -D Type=Dimmable	upnp-light.groovy.m4 > upnp-dimmablelight.src/upnp-dimmablelight.groovy
