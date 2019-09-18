@@ -115,9 +115,11 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 void controlResponseSwitchPowerGetStatus(physicalgraph.device.HubResponse hubResponse) {
 	Map args = controlResponse 'SwitchPower', 'GetStatus', hubResponse
 	log.debug "controlResponseSwitchPowerGetStatus: $args"
-	String value = '1' == args.ResultStatus ? 'on' : 'off'
-	log.info "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
-	sendEvent name: 'switch', value: value
+	if (args.containsKey('ResultStatus') {
+		String value = '1' == args.ResultStatus ? 'on' : 'off'
+		log.info "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
+		sendEvent name: 'switch', value: value
+	}
 }
 ifelse(«Dimmable», Type, «dnl
 
@@ -332,10 +334,7 @@ private void attach() {
 	groovy.util.slurpersupport.GPathResult serviceList = xml.device.serviceList
 	['SwitchPower'ifelse(«Dimmable», Type, «, 'Dimming'»)].each {service ->
 		groovy.util.slurpersupport.GPathResult action = serviceList.'*'.find {action ->
-			String id = action.serviceId.text()
-			false \
-				|| "urn:upnp-org:serviceId:$service:1" == id \
-				|| "urn:schemas-upnp-org:serviceId:$service" == id
+			"urn:schemas-upnp-org:service:$service:1" == action.serviceType.text()
 		}
 		updateDataValue "controlPath$service", action.controlURL.text()
 		updateDataValue "eventPath$service", action.eventSubURL.text()
