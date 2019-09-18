@@ -138,10 +138,10 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 		if (false
 				|| remembered.networkAddress	!= discovered.networkAddress
 				|| remembered.deviceAddress		!= discovered.deviceAddress) {
-            if (child) {
+			if (child) {
 				log.debug "ssdpDiscovered: (getChildDevice $discovered.mac).update $udn $discovered.networkAddress $discovered.deviceAddress"
 				child.update udn, discovered.networkAddress, discovered.deviceAddress
-            }
+			}
 		}
 	}
 	rememberedDevice."$udn" = discovered;
