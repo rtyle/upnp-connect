@@ -40,8 +40,8 @@ private String getName() {
 
 // map of Uniform Resource Name (URN) to SmartThings Device Handler characteristics
 private Map getUrnToDeviceHandler() {[
-	'schemas-upnp-org:device:BinaryLight:1'		: [namespace: 'rtyle', name: 'UPnP BinaryLight'],
-	'schemas-upnp-org:device:DimmableLight:1'	: [namespace: 'rtyle', name: 'UPnP DimmableLight'],
+	'schemas-upnp-org:device:BinaryLight:1'		: [namespace: namespace, name: 'UPnP BinaryLight'],
+	'schemas-upnp-org:device:DimmableLight:1'	: [namespace: namespace, name: 'UPnP DimmableLight'],
 ]}
 
 private Integer decodeHexadecimal(String hexadecimal) {
