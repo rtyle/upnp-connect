@@ -100,7 +100,7 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 		if (!child) {
 			def label = name + ' ' + mac
 			log.debug "ssdpPathResponse: addChildDevice $namespace, $name, $mac, $hubResponse.hubId [label: $label, completedSetup: true]"
-			child = addChildDevice namespace, name, mac, hubResponse.hubId, [label: label, completedSetup: true]
+			child = addChildDevice namespace, name, mac, hubResponse.hubId, [label: label, completedSetup: true, isComponent: true]
 		}
 
 		// tell the MAC identified child to create a UDN identified child, if able/needed
