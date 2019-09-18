@@ -99,7 +99,7 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 void controlResponseSwitchPowerGetStatus(physicalgraph.device.HubResponse hubResponse) {
 	Map args = controlResponse 'SwitchPower', 'GetStatus', hubResponse
 	log.debug "controlResponseSwitchPowerGetStatus: $args"
-	if (args.containsKey('ResultStatus') {
+	if (args.containsKey('ResultStatus')) {
 		String value = '1' == args.ResultStatus ? 'on' : 'off'
 		log.info "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
 		sendEvent name: 'switch', value: value

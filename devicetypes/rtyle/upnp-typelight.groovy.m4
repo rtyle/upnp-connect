@@ -115,7 +115,7 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 void controlResponseSwitchPowerGetStatus(physicalgraph.device.HubResponse hubResponse) {
 	Map args = controlResponse 'SwitchPower', 'GetStatus', hubResponse
 	log.debug "controlResponseSwitchPowerGetStatus: $args"
-	if (args.containsKey('ResultStatus') {
+	if (args.containsKey('ResultStatus')) {
 		String value = '1' == args.ResultStatus ? 'on' : 'off'
 		log.info "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
 		sendEvent name: 'switch', value: value
@@ -126,9 +126,11 @@ ifelse(«Dimmable», Type, «dnl
 void controlResponseDimmingGetLoadLevelStatus(physicalgraph.device.HubResponse hubResponse) {
 	Map args = controlResponse 'Dimming', 'GetLoadLevelStatus', hubResponse
 	log.debug "controlResponseDimmingGetLoadLevelStatus $args"
-	String value = args.retLoadLevelStatus
-	log.info "controlResponseDimmingGetLoadLevelStatus: sendEvent name: 'level', value: $value"
-	sendEvent name: 'level', value: value
+	if (args.containsKey('retLoadLevelStatus')) {
+		String value = args.retLoadLevelStatus
+		log.info "controlResponseDimmingGetLoadLevelStatus: sendEvent name: 'level', value: $value"
+		sendEvent name: 'level', value: value
+	}
 }
 »)dnl
 
