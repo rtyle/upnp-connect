@@ -153,6 +153,11 @@ void off() {
 void setLevel(level) {
 	log.debug "setLevel: $level"
 	control 'Dimming', 'SetLoadLevelTarget', [NewLoadLevelTarget: level]
+	if (level) {
+		on()
+	} else {
+		off()
+	}
 }
 
 private String getNetworkAddress() {

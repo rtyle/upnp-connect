@@ -167,6 +167,11 @@ ifelse(«Dimmable», Type, «dnl
 void setLevel(level) {
 	log.debug "setLevel: $level"
 	control 'Dimming', 'SetLoadLevelTarget', [NewLoadLevelTarget: level]
+	if (level) {
+		on()
+	} else {
+		off()
+	}
 }
 »)dnl
 
