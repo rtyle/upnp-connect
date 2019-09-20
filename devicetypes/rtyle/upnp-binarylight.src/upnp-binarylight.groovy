@@ -325,10 +325,12 @@ void install() {
 
 void update(String networkAddress_, String deviceAddress_) {
 	log.debug("update: $networkAddress_, $deviceAddress_")
-	detach()
-	networkAddress = networkAddress_
-	deviceAddress = deviceAddress_
-	attach()
+    if (networkAddress != networkAddress_ || deviceAddress != deviceAddress_) {
+        detach()
+        networkAddress = networkAddress_
+        deviceAddress = deviceAddress_
+        attach()
+    }
 }
 
 void uninstall() {
