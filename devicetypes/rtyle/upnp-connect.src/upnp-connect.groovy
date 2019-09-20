@@ -16,6 +16,11 @@
 metadata {
 	definition (name: 'UPnP (Connect)', namespace: 'rtyle', author: 'Ross Tyler') {
 	}
+    // we have no need for tiles
+    // but unless we do something we'll see 'Tiles Missing' in the Things tab of the phone app
+    tiles(scale: 2) {
+    	standardTile('.', '') {}
+    }
 }
 
 // Events returned by parse would be handled by the SmartThings runtime.
