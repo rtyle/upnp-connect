@@ -80,37 +80,52 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 	// log.debug "ssdpPathResponse: $message.body"
 	def xml = parseXml(message.body)
 	def device = xml.device
-	def udn = decodeMap(device.UDN.text()).uuid
+	String udn = decodeMap(device.UDN.text()).uuid
 	log.debug "ssdpPathResponse: udn=$udn"
+
 	if (rememberedDevice."$udn") {
 		def remembered = rememberedDevice."$udn"
 
-		// We would have liked to create a child SmartThings device to handle each UPnP device
-		// but SmartThings delivers events from a UPnP device
-		// to the SmartThings device identified by the MAC address of the UPnP device that the hub received the event from.
+		// SmartThings delivers events from a UPnP device
+		// to the SmartThings device identified by the MAC address of the UPnP device
+        // that the hub received the event from.
 		// UPnP identifies its devices with a UDN and there may be many UPnP devices supported at a MAC address.
-		// So, our child SmartThings devices are identified by MAC addresses and their children are identified by UDNs.
+        // We create a child for each MAC address and one for each UDN.
 		// The UDN identified devices handle all UPnP communication directly except they cannot handle event reception.
 		// Instead, they encode their UDN and notify method in the SUBSCRIBE CALLBACK header.
-		// Their parent's parse method will decode this from the HTTP request and dispatch the notification to the child.
+		// The MAC identified devices' parse method will decode this from the HTTP request,
+        // and notify the UDN identified device.
 
 		// create the MAC identified child, if needed
-		def mac = remembered.mac
-		def child = getChildDevice mac
-		if (!child) {
+		String mac = remembered.mac
+		physicalgraph.app.DeviceWrapper macChild = getChildDevice mac
+		if (!macChild) {
 			def label = name + ' ' + mac
 			log.debug "ssdpPathResponse: addChildDevice $namespace, $name, $mac, $hubResponse.hubId [label: $label, completedSetup: true]"
-			child = addChildDevice namespace, name, mac, hubResponse.hubId, [label: label, completedSetup: true, isComponent: true]
+			macChild = addChildDevice namespace, name, mac, hubResponse.hubId, [label: label, completedSetup: true]
 		}
 
-		// tell the MAC identified child to create a UDN identified child, if able/needed
+		// create the UDN identified child, if we support its URN and needed
 		String urn = remembered.ssdpTerm.urn
 		log.debug("ssdpPathResponse: urn=$urn")
 		if (urnToDeviceHandler."$urn") {
 			def deviceHandler = urnToDeviceHandler."$urn"
 			log.debug("ssdpPathResponse: urn=$urn device hander $deviceHandler")
-			child.add deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, hubResponse.description,
-				remembered.networkAddress, remembered.deviceAddress, remembered.ssdpPath, device.friendlyName.text()
+            physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
+            if (!udnChild) {
+                log.debug "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: device.friendlyName.text(), data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
+                udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, [
+                    data			: [
+                        description		: hubResponse.description,
+                        networkAddress	: remembered.networkAddress,
+                        deviceAddress	: remembered.deviceAddress,
+                        ssdpPath		: remembered.ssdpPath,
+                    ],
+                    label			: device.friendlyName.text(),
+                    completedSetup	: true,
+                ]
+                udnChild.install()
+            }
 		} else {
 			log.error("ssdpPathResponse: urn=$urn has no device handler")
 		}
@@ -122,6 +137,7 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 	discovered.ssdpUSN = decodeMap discovered.ssdpUSN, '\\s*::\\s*'
 	discovered.ssdpTerm = decodeMap discovered.ssdpTerm
 	log.debug "ssdpDiscovered: $discovered"
+
 	String urn = discovered.ssdpUSN.urn
 	if (!urnToDeviceHandler."$urn") {
 		// ignore discovered services
@@ -130,23 +146,14 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 		return
 	}
 
-	def child = getChildDevice discovered.mac
-
-	String udn = discovered.ssdpUSN.uuid	// udn
-	if (rememberedDevice."$udn") {
-		def remembered = rememberedDevice."$udn"
-		if (false
-				|| remembered.networkAddress	!= discovered.networkAddress
-				|| remembered.deviceAddress		!= discovered.deviceAddress) {
-			if (child) {
-				log.debug "ssdpDiscovered: (getChildDevice $discovered.mac).update $udn $discovered.networkAddress $discovered.deviceAddress"
-				child.update udn, discovered.networkAddress, discovered.deviceAddress
-			}
-		}
-	}
+	String udn = discovered.ssdpUSN.uuid
 	rememberedDevice."$udn" = discovered;
 
-	if (!(child?.hasChild(udn))) {
+	physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
+    if (udnChild) {
+        log.debug "ssdpDiscovered: (getChildDevice $udn).update $discovered.networkAddress $discovered.deviceAddress"
+        udnChild.update discovered.networkAddress, discovered.deviceAddress	
+    } else {
 		String target = decodeNetworkAddress(discovered.networkAddress) + ':' + decodeDeviceAddress(discovered.deviceAddress)
 		log.debug "ssdpDiscovered: GET http://$target${discovered.ssdpPath}"
 		sendHubCommand new physicalgraph.device.HubAction(
@@ -176,12 +183,12 @@ private void ssdpSubscribe() {
 }
 
 void updated() {
-	log.debug "updated: ${settings}"
+	log.debug "updated"
 	ssdpDiscover()
 }
 
 void installed() {
-	log.debug "installed: ${settings}"
+	log.debug "installed"
 	ssdpSubscribe()
 	ssdpDiscover()
 }
