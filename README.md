@@ -29,5 +29,16 @@ One should deploy the **UPnP (Connect)** SmartApp to initiate discovery and devi
 If there are many devices, creation for some may fail.
 Initiate discovery again by opening the SmartApp settings and clicking Save.
 Repeat until all your devices are supported.
+Repeat again when new devices are added.
 
-You can remove any of the created devices but they will be recreated the next time you initiate **UPnP (Connect)** discovery.
+For each hosted service implementing supported UPnP devices on your LAN,
+a special device named **UPnP (Connect) MAC** will be created to support events coming from its host
+where **MAC** is the MAC address of that host.
+If the IP address or port of such a service changes,
+initiate **UPnP (Connect)** discovery again to find it.
+Repeat until all your devices are supported again.
+  
+The **UPnP (Connect)** SmartApp will never remove any of its created devices until the SmartApp is removed.
+This includes the special **UPnP (Connect) MAC** devices.
+You can remove any of these manually if you want
+but if they still exist on your LAN they will be recreated the next time you initiate **UPnP (Connect)** discovery.
