@@ -88,13 +88,13 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 
 		// SmartThings delivers events from a UPnP device
 		// to the SmartThings device identified by the MAC address of the UPnP device
-        // that the hub received the event from.
+		// that the hub received the event from.
 		// UPnP identifies its devices with a UDN and there may be many UPnP devices supported at a MAC address.
-        // We create a child for each MAC address and one for each UDN.
+		// We create a child for each MAC address and one for each UDN.
 		// The UDN identified devices handle all UPnP communication directly except they cannot handle event reception.
 		// Instead, they encode their UDN and notify method in the SUBSCRIBE CALLBACK header.
 		// The MAC identified devices' parse method will decode this from the HTTP request,
-        // and notify the UDN identified device.
+		// and notify the UDN identified device.
 
 		// create the MAC identified child, if needed
 		String mac = remembered.mac
@@ -111,21 +111,21 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 		if (urnToDeviceHandler."$urn") {
 			def deviceHandler = urnToDeviceHandler."$urn"
 			log.debug("ssdpPathResponse: urn=$urn device hander $deviceHandler")
-            physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
-            if (!udnChild) {
-                log.debug "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: device.friendlyName.text(), data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
-                udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, [
-                    data			: [
-                        description		: hubResponse.description,
-                        networkAddress	: remembered.networkAddress,
-                        deviceAddress	: remembered.deviceAddress,
-                        ssdpPath		: remembered.ssdpPath,
-                    ],
-                    label			: device.friendlyName.text(),
-                    completedSetup	: true,
-                ]
-                udnChild.install()
-            }
+			physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
+			if (!udnChild) {
+				log.debug "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: device.friendlyName.text(), data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
+				udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, [
+					data			: [
+						description		: hubResponse.description,
+						networkAddress	: remembered.networkAddress,
+						deviceAddress	: remembered.deviceAddress,
+						ssdpPath		: remembered.ssdpPath,
+					],
+					label			: device.friendlyName.text(),
+					completedSetup	: true,
+				]
+				udnChild.install()
+			}
 		} else {
 			log.error("ssdpPathResponse: urn=$urn has no device handler")
 		}
@@ -150,10 +150,10 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 	rememberedDevice."$udn" = discovered;
 
 	physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
-    if (udnChild) {
-        log.debug "ssdpDiscovered: (getChildDevice $udn).update $discovered.networkAddress $discovered.deviceAddress"
-        udnChild.update discovered.networkAddress, discovered.deviceAddress	
-    } else {
+	if (udnChild) {
+		log.debug "ssdpDiscovered: (getChildDevice $udn).update $discovered.networkAddress $discovered.deviceAddress"
+		udnChild.update discovered.networkAddress, discovered.deviceAddress	
+	} else {
 		String target = decodeNetworkAddress(discovered.networkAddress) + ':' + decodeDeviceAddress(discovered.deviceAddress)
 		log.debug "ssdpDiscovered: GET http://$target${discovered.ssdpPath}"
 		sendHubCommand new physicalgraph.device.HubAction(
