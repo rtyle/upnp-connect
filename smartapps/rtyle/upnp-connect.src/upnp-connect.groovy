@@ -33,9 +33,7 @@ definition(
 )
 
 preferences {
-	section('Title') {
-		// TODO: put inputs here
-	}
+	input 'discover', 'bool', defaultValue: true, title: '(Re)start discovery'
 }
 
 private String getNamespace() {
@@ -173,12 +171,14 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 }
 
 private void ssdpDiscover() {
-	List hubActions = [];
-	urnToDeviceHandler.each {urn, notUsed ->
-		log.debug "ssdpDiscover: hubAction lan discover urn:${urn}"
-		hubActions.add new physicalgraph.device.HubAction('lan discovery urn:' + urn, physicalgraph.device.Protocol.LAN)
+	if (discover) {
+        List hubActions = [];
+        urnToDeviceHandler.each {urn, notUsed ->
+            log.debug "ssdpDiscover: hubAction lan discover urn:${urn}"
+            hubActions.add new physicalgraph.device.HubAction('lan discovery urn:' + urn, physicalgraph.device.Protocol.LAN)
+        }
+        sendHubCommand hubActions, 4000	// perform hubActions with a delay between them
 	}
-	sendHubCommand hubActions, 4000	// perform hubActions with a delay between them
 }
 
 private void ssdpSubscribe() {
@@ -190,12 +190,12 @@ private void ssdpSubscribe() {
 }
 
 void updated() {
-	log.debug "updated"
+	log.debug "updated $settings"
 	ssdpDiscover()
 }
 
 void installed() {
-	log.debug "installed"
+	log.debug "installed $settings"
 	ssdpSubscribe()
 	ssdpDiscover()
 }
