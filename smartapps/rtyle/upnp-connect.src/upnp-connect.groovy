@@ -172,12 +172,12 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 
 private void ssdpDiscover() {
 	if (discover) {
-        List hubActions = [];
-        urnToDeviceHandler.each {urn, notUsed ->
-            log.debug "ssdpDiscover: hubAction lan discover urn:${urn}"
-            hubActions.add new physicalgraph.device.HubAction('lan discovery urn:' + urn, physicalgraph.device.Protocol.LAN)
-        }
-        sendHubCommand hubActions, 4000	// perform hubActions with a delay between them
+		List hubActions = [];
+		urnToDeviceHandler.each {urn, notUsed ->
+			log.debug "ssdpDiscover: hubAction lan discover urn:${urn}"
+			hubActions.add new physicalgraph.device.HubAction('lan discovery urn:' + urn, physicalgraph.device.Protocol.LAN)
+		}
+		sendHubCommand hubActions, 4000	// perform hubActions with a delay between them
 	}
 }
 
