@@ -13,9 +13,17 @@
  *	on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *	for the specific language governing permissions and limitations under the License.
 **/
+
+private static String namespace() {
+	'rtyle'
+}
+private static String name() {
+	'UPnP (Connect)'
+}
+
 definition(
-	name		: 'UPnP (Connect)',
-	namespace	: 'rtyle',
+	namespace	: namespace(),
+	name		: name(),
 	author		: 'Ross Tyler',
 	description	: 'UPnP connect to hub-local devices',
 	category	: 'Convenience',
@@ -30,12 +38,11 @@ preferences {
 	}
 }
 
-// we would have liked to have gotten these from the definition above (or vice-versa)
 private String getNamespace() {
-	'rtyle'
+	namespace()
 }
 private String getName() {
-	'UPnP (Connect)'
+	name()
 }
 
 // map of Uniform Resource Name (URN) to SmartThings Device Handler characteristics
