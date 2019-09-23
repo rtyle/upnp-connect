@@ -33,7 +33,7 @@ definition(
 )
 
 preferences {
-	input 'discover', 'bool', defaultValue: true, title: '(Re)start discovery'
+	input 'search', 'bool', defaultValue: true, title: 'Request discovery search'
 }
 
 private String getNamespace() {
@@ -171,7 +171,7 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 }
 
 private void ssdpDiscover() {
-	if (discover) {
+	if (search) {
 		List hubActions = [];
 		urnToDeviceHandler.each {urn, notUsed ->
 			log.debug "ssdpDiscover: hubAction lan discover urn:${urn}"
