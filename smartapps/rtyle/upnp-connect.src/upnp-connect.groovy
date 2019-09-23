@@ -33,7 +33,7 @@ definition(
 )
 
 preferences {
-	input 'search', 'bool', defaultValue: true, title: 'Request discovery search'
+	input 'search', 'bool', defaultValue: true, title: 'Request a discovery search'
 }
 
 private String getNamespace() {
