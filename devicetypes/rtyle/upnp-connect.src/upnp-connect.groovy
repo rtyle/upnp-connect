@@ -18,7 +18,7 @@ metadata {
 	}
 	// we have no need for tiles
 	// but unless we do something we'll see 'Tiles Missing' in the Things tab of the phone app
-	tiles(scale: 2) {
+	tiles() {
 		standardTile('.', '') {}
 	}
 }
