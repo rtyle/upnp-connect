@@ -120,7 +120,7 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 			log.debug("ssdpPathResponse: urn=$urn device hander $deviceHandler")
 			physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
 			if (!udnChild) {
-            	String label = (prefix && !prefix.isEmpty() ? prefix + ' ' : '') + device.friendlyName.text()
+				String label = (prefix && !prefix.isEmpty() ? prefix + ' ' : '') + device.friendlyName.text()
 				log.debug "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: $label, data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
 				udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, [
 					data			: [
@@ -162,7 +162,7 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 		log.debug "ssdpDiscovered: (getChildDevice $udn).update $discovered.networkAddress $discovered.deviceAddress"
 		udnChild.update discovered.networkAddress, discovered.deviceAddress	
 	} else {
-    	if (create) {
+		if (create) {
 			String target = decodeNetworkAddress(discovered.networkAddress) + ':' + decodeDeviceAddress(discovered.deviceAddress)
 			log.debug "ssdpDiscovered: GET http://$target${discovered.ssdpPath}"
 			sendHubCommand new physicalgraph.device.HubAction(
