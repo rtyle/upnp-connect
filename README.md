@@ -45,4 +45,4 @@ You can remove any of the **UPnP (Connect)** SmartApp's Devices manually if you 
 but if they still exist on your LAN they will be recreated automatically the next time they are discovered.
 If you don't want **UPnP (Connect)** to create any more discovered devices, turn off the *Create discovered devices* setting.
 
-**UPnP (Connect)** will add a prefix to the *friendlyName* of a UPnP device when creating/labeling a new SmartThings device. By default, this 'UPnP '. This *Device label prefix* can be changed or even removed in the SmartApp's settings.
+**UPnP (Connect)** will add a prefix to the *friendlyName* of a UPnP device when creating/labeling a new SmartThings device. By default, this is 'UPnP '. This *Device label prefix* can be changed or even removed in the SmartApp's settings.
