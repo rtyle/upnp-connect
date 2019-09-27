@@ -200,7 +200,7 @@ private String getHub() {
 }
 
 void notifySwitchPower(notification) {
-	log.debug "notifySwitchPower: $notification.body"
+	// log.debug "notifySwitchPower: $notification.body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
 	String status = xml.property.Status.text()
 	if (status) {
@@ -211,7 +211,7 @@ void notifySwitchPower(notification) {
 }
 
 void notifyDimming(notification) {
-	log.debug "notifyDimming: $notification.body"
+	// log.debug "notifyDimming: $notification.body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
 	String value = xml.property.LoadLevelStatus.text()
 	if (value) {

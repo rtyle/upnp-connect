@@ -165,7 +165,7 @@ private String getHub() {
 }
 
 void notifySwitchPower(notification) {
-	log.debug "notifySwitchPower: $notification.body"
+	// log.debug "notifySwitchPower: $notification.body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
 	String status = xml.property.Status.text()
 	if (status) {
