@@ -96,7 +96,7 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 		log.error "controlResponse: $statusCode $reason"
 		null
 	} else {
-		log.debug "controlResponse: $message.body"
+		// log.debug "controlResponse: $message.body"
 		groovy.util.slurpersupport.GPathResult xml = parseXml message.body
 		Map args = [:]
 		xml.Body."${action}Response".'*'.each {node ->
