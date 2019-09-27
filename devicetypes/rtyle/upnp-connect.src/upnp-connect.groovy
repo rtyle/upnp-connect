@@ -31,8 +31,9 @@ metadata {
 void parse(description) {
 	// parse the lan message notification and pass it to the appropriate child
 	def notification = parseLanMessage description
-	log.debug "parse: $notification"
+	// log.debug "parse: $notification"
 	String request = notification.header.split('\r\n')[0]
+	log.debug "parse: $request"
 	// NOTIFY path HTTP/1.1
 	def path = request.split('\\s+')[1].split('/')
 	String udn = path[1]
