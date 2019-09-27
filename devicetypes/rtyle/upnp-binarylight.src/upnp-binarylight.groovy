@@ -196,7 +196,6 @@ private void upnpSubscribe(String service) {
 		udn,
 		[callback: "upnpSubscribeResponse$service"],
 	)
-	runIn(60, "upnpSubscribe$service")	// unschedule on success
 }
 
 private void resubscribe(String service) {
@@ -210,13 +209,12 @@ private void resubscribe(String service) {
 			headers: [
 				Host	: host,
 				SID		: "uuid:$sid",
-				TIMEOUT	: 'Second-480',
+				TIMEOUT	: 'Second-960',
 			],
 		],
 		udn,
 		[callback: "upnpSubscribeResponse$service"],
 	)
-	runIn(60, "upnpSubscribe$service")	// unschedule on success
 }
 
 void upnpSubscribeSwitchPower() {
@@ -237,19 +235,13 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	if (200 != statusCode) {
 		String reason = part[2]
 		log.error "upnpSubscribeResponse: $statusCode $reason"
+		runIn 60, "upnpSubscribe$service"	// unschedule on success
 	} else {
 		def headers = message.headers
 		String sid = headers.sid.split(':')[1]
 		updateDataValue "sid$service", sid
 		unschedule "upnpSubscribe$service"	// success
 		refresh()
-		Integer timeout = headers.timeout.split('-')[1].toInteger()
-		if (120 > timeout) {
-			timeout /= 2
-		} else {
-			timeout -= 60
-		}
-		runIn(timeout, "resubscribe$service")
 	}
 }
 
@@ -270,6 +262,19 @@ private void attach() {
 		updateDataValue "controlPath$service", action.controlURL.text()
 		updateDataValue "eventPath$service", action.eventSubURL.text()
 		upnpSubscribe service
+
+		// Once we receive a good response to our subscription request,
+		// we will need to renew it before it expires.
+		// Using runIn to do so does not work well because
+		// scheduling is, at best, late and, at worst, doesn't happen at all.
+		// Instead, we set up a periodic schedule here using a runEvery* method.
+		// These work much better.
+		// From now, our first period will elapse sometime before it should
+		// but subsequent ones will be close to clockwork.
+		// We don't have a lot of choices for the period (1, 5, 10, 15, 30, 60, 180 minutes).
+		// We will ask for an 16 minute subscription, assume that we get it and
+		// resubscribe every 10 minutes.
+		runEvery10Minutes "resubscribe$service"
 	}
 }
 

@@ -321,17 +321,17 @@ private void attach() {
 		upnpSubscribe service
 
 		// Once we receive a good response to our subscription request,
-        // we may need to renew it before it expires.
-        // Using runIn to do so does not work well because
-        // scheduling is, at best, late and, at worst, doesn't happen at all.
-        // Instead, we set up a periodic schedule here using a runEvery* method
-        // These work much better.
-        // From now, our first period will elapse sometime before it should
-        // but subsequent ones will be close to clockwork.
-        // We don't have a lot of choices for the period (1, 5, 10, 15, 30, 60, 180 minutes).
-        // We will ask for an 16 minute subscription, assume that we get it and
-        // resubscribe every 10 minutes.
-        runEvery10Minutes "resubscribe$service"
+		// we will need to renew it before it expires.
+		// Using runIn to do so does not work well because
+		// scheduling is, at best, late and, at worst, doesn't happen at all.
+		// Instead, we set up a periodic schedule here using a runEvery* method.
+		// These work much better.
+		// From now, our first period will elapse sometime before it should
+		// but subsequent ones will be close to clockwork.
+		// We don't have a lot of choices for the period (1, 5, 10, 15, 30, 60, 180 minutes).
+		// We will ask for an 16 minute subscription, assume that we get it and
+		// resubscribe every 10 minutes.
+		runEvery10Minutes "resubscribe$service"
 	}
 }
 
