@@ -39,7 +39,7 @@ metadata {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
 		main(["switch"])
-		details(["switch", "explicitOn", "explicitOff", "levelSlider", 'refresh'])
+		details(["switch", "explicitOn", "explicitOff", 'refresh'])
 	}
 }
 
