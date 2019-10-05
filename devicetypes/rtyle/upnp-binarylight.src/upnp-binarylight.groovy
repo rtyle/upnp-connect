@@ -51,9 +51,9 @@ private int getDebug() {1}
 private int getInfo	() {2}
 private int getWarn	() {3}
 private int getError() {4}
-private void log(int level, String message, Throwable throwable = null) {
+private void log(int level, String message) {
 	if (level > (null == logLevel ? 1 : logLevel)) {
-		log."${['trace', 'debug', 'info', 'warn', 'error'][level]}" message, throwable
+		log."${['trace', 'debug', 'info', 'warn', 'error'][level]}" message
 	}
 }
 
