@@ -41,10 +41,24 @@ metadata {
 		main(["switch"])
 		details(["switch", "explicitOn", "explicitOff", 'refresh'])
 	}
+	preferences {
+		input 'logLevel', 'number', defaultValue: '1', title: 'Log level (-1..4: trace, debug, info, warn, error, none)', range: '-1..4'
+	}
+}
+
+private int getTrace() {0}
+private int getDebug() {1}
+private int getInfo	() {2}
+private int getWarn	() {3}
+private int getError() {4}
+private void log(int level, String message, Throwable throwable = null) {
+	if (level > (null == logLevel ? 1 : logLevel)) {
+		log."${['trace', 'debug', 'info', 'warn', 'error'][level]}" message, throwable
+	}
 }
 
 private void control(String service, String action, Map args = null) {
-	log.debug "control: $service, $action, $args"
+	log debug, "control: $service, $action, $args"
 	String path = getDataValue "controlPath$service"
 	String soapArgs = ''
 	args?.each {name, value ->
@@ -76,17 +90,17 @@ private void control(String service, String action, Map args = null) {
 
 private Map controlResponse(String service, String action, physicalgraph.device.HubResponse hubResponse) {
 	def message = parseLanMessage hubResponse.description
-	log.debug "controlResponse: $service, $action, $message.headers"
+	log debug, "controlResponse: $service, $action, $message.headers"
 	String response = message.header.split('\r\n')[0]
 	// HTTP/1.1 <statusCode> <reason>
 	def part = response.split('\\s+')
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log.error "controlResponse: $statusCode $reason"
+		log error, "controlResponse: $statusCode $reason"
 		null
 	} else {
-		// log.debug "controlResponse: $message.body"
+		// log debug, "controlResponse: $message.body"
 		groovy.util.slurpersupport.GPathResult xml = parseXml message.body
 		Map args = [:]
 		xml.Body."${action}Response".'*'.each {node ->
@@ -98,10 +112,10 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 
 void controlResponseSwitchPowerGetStatus(physicalgraph.device.HubResponse hubResponse) {
 	Map args = controlResponse 'SwitchPower', 'GetStatus', hubResponse
-	log.debug "controlResponseSwitchPowerGetStatus: $args"
+	log debug, "controlResponseSwitchPowerGetStatus: $args"
 	if (args.containsKey('ResultStatus')) {
 		String value = '1' == args.ResultStatus ? 'on' : 'off'
-		log.info "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
+		log info, "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
 		sendEvent name: 'switch', value: value
 	}
 }
@@ -111,17 +125,17 @@ void controlResponseSwitchPowerSetTarget(physicalgraph.device.HubResponse hubRes
 }
 
 void refresh() {
-	log.debug 'refresh'
+	log debug, 'refresh'
 	control 'SwitchPower', 'GetStatus'
 }
 
 void on() {
-	log.debug 'on'
+	log debug, 'on'
 	control 'SwitchPower', 'SetTarget', [NewTargetValue: '1']
 }
 
 void off() {
-	log.debug 'off'
+	log debug, 'off'
 	control 'SwitchPower', 'SetTarget', [NewTargetValue: '0']
 }
 
@@ -165,23 +179,23 @@ private String getHub() {
 }
 
 void notifySwitchPower(notification) {
-	// log.debug "notifySwitchPower: $notification.body"
+	// log debug, "notifySwitchPower: $notification.body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
 	String status = xml.property.Status.text()
 	if (status) {
 		String value = '1' == status ? 'on' : 'off'
-		log.info "notifySwitchPower: sendEvent name: 'switch', value: $value"
+		log info, "notifySwitchPower: sendEvent name: 'switch', value: $value"
 		sendEvent name: 'switch', value: value
 	}
 }
 
 void parse(event) {
-	log.error "parse: not expected: $event"
+	log error, "parse: not expected: $event"
 }
 
 private void upnpSubscribe(String service) {
 	String path = getDataValue "eventPath$service"
-	log.debug "upnpSubscribe: $service, $path"
+	log debug, "upnpSubscribe: $service, $path"
 	String udn = device.deviceNetworkId
 	sendHubCommand new physicalgraph.device.HubAction([
 			method	: 'SUBSCRIBE',
@@ -201,7 +215,7 @@ private void upnpSubscribe(String service) {
 private void resubscribe(String service) {
 	String sid = getDataValue "sid$service"
 	String path = getDataValue "eventPath$service"
-	log.debug "resubscribe: $service, $path, $sid"
+	log debug, "resubscribe: $service, $path, $sid"
 	String udn = device.deviceNetworkId
 	sendHubCommand new physicalgraph.device.HubAction([
 			method	: 'SUBSCRIBE',
@@ -227,14 +241,14 @@ void resubscribeSwitchPower() {
 
 private void upnpSubscribeResponse(String service, physicalgraph.device.HubResponse hubResponse) {
 	def message = parseLanMessage hubResponse.description
-	log.debug "upnpSubscribeResponse: $service, $message.headers"
+	log debug, "upnpSubscribeResponse: $service, $message.headers"
 	String response = message.header.split('\r\n')[0]
 	// HTTP/1.1 <statusCode> <reason>
 	def part = response.split('\\s+')
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log.error "upnpSubscribeResponse: $statusCode $reason"
+		log error, "upnpSubscribeResponse: $statusCode $reason"
 		runIn 60, "upnpSubscribe$service"	// unschedule on success
 	} else {
 		def headers = message.headers
@@ -252,7 +266,7 @@ void upnpSubscribeResponseSwitchPower(physicalgraph.device.HubResponse hubRespon
 private void attach() {
 	def message = parseLanMessage description
 	String body = message.body
-	log.debug "attach: $body"
+	log debug, "attach: $body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml message.body
 	groovy.util.slurpersupport.GPathResult serviceList = xml.device.serviceList
 	['SwitchPower'].each {service ->
@@ -281,7 +295,7 @@ private void attach() {
 private void upnpUnsubscribe(String service) {
 	String path = getDataValue "eventPath$service"
 	String sid = getDataValue "sid$service"
-	log.debug "upnpUnsubscribe: $service, $path, $sid"
+	log debug, "upnpUnsubscribe: $service, $path, $sid"
 	if (path && sid) {
 		sendHubCommand new physicalgraph.device.HubAction([
 				method	: 'UNSUBSCRIBE',
@@ -299,14 +313,14 @@ private void upnpUnsubscribe(String service) {
 
 void upnpUnsubscribeResponse(String service, physicalgraph.device.HubResponse hubResponse) {
 	def message = parseLanMessage hubResponse.description
-	log.debug "upnpUnsubscribeResponse: $service, $message"
+	log debug, "upnpUnsubscribeResponse: $service, $message"
 	String response = message.header.split('\r\n')[0]
 	// HTTP/1.1 <statusCode> <reason>
 	def part = response.split('\\s+')
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log.error "upnpUnsubscribeResponse: $statusCode $reason"
+		log error, "upnpUnsubscribeResponse: $statusCode $reason"
 	} else {
 		updateDataValue "sid$service", ''
 	}
@@ -317,19 +331,19 @@ void upnpUnsubscribeResponseSwitchPower(physicalgraph.device.HubResponse hubResp
 }
 
 private void detach() {
-	log.debug "detach"
+	log debug, "detach"
 	['SwitchPower'].each {service ->
 		upnpUnsubscribe service
 	}
 }
 
 void install() {
-	log.debug("install")
+	log debug, "install"
 	attach()
 }
 
 void update(String networkAddress_, String deviceAddress_) {
-	log.debug("update: $networkAddress_, $deviceAddress_")
+	log debug, "update: $networkAddress_, $deviceAddress_"
 	if (networkAddress != networkAddress_ || deviceAddress != deviceAddress_) {
 		detach()
 		networkAddress = networkAddress_
@@ -339,6 +353,6 @@ void update(String networkAddress_, String deviceAddress_) {
 }
 
 void uninstall() {
-	log.debug("uninstall")
+	log debug, "uninstall"
 	detach()
 }
