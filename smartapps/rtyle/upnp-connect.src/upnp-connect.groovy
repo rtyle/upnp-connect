@@ -36,7 +36,7 @@ preferences {
 	input 'search', 'bool', defaultValue: true, title: 'Request a discovery search'
 	input 'create', 'bool', defaultValue: true, title: 'Create discovered devices'
 	input 'prefix', 'text', defaultValue: 'UPnP', required: false, title: 'Device label prefix'
-	input 'logLevel', 'number', defaultValue: '1', title: 'Log level [-1..4]', range: '-1..4'
+	input 'logLevel', 'number', defaultValue: '1', title: 'Log level (-1..4: trace, debug, info, warn, error, none)', range: '-1..4'
 }
 
 private int getTrace() {0}
@@ -120,7 +120,7 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 		physicalgraph.app.DeviceWrapper macChild = getChildDevice mac
 		if (!macChild) {
 			def label = name + ' ' + mac
-			log debug, "ssdpPathResponse: addChildDevice $namespace, $name, $mac, $hubResponse.hubId [label: $label, completedSetup: true]"
+			log info, "ssdpPathResponse: addChildDevice $namespace, $name, $mac, $hubResponse.hubId [label: $label, completedSetup: true]"
 			macChild = addChildDevice namespace, name, mac, hubResponse.hubId, [label: label, completedSetup: true]
 		}
 
@@ -133,7 +133,7 @@ void ssdpPathResponse(physicalgraph.device.HubResponse hubResponse) {
 			physicalgraph.app.DeviceWrapper udnChild = getChildDevice udn
 			if (!udnChild) {
 				String label = (prefix && !prefix.isEmpty() ? prefix + ' ' : '') + device.friendlyName.text()
-				log debug, "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: $label, data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
+				log info, "ssdpPathResponse: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, hubResponse.hubId, [label: $label, data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $hubResponse.description]]"
 				udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubResponse.hubId, [
 					data			: [
 						description		: hubResponse.description,
