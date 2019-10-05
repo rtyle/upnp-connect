@@ -21,6 +21,20 @@ metadata {
 	tiles() {
 		standardTile('.', '') {}
 	}
+	preferences {
+		input 'logLevel', 'number', defaultValue: '1', title: 'Log level (-1..4: trace, debug, info, warn, error, none)', range: '-1..4'
+	}
+}
+
+private int getTrace() {0}
+private int getDebug() {1}
+private int getInfo	() {2}
+private int getWarn	() {3}
+private int getError() {4}
+private void log(int level, String message, Throwable throwable = null) {
+	if (level > (null == logLevel ? 1 : logLevel)) {
+		log."${['trace', 'debug', 'info', 'warn', 'error'][level]}" message, throwable
+	}
 }
 
 // Events returned by parse would be handled by the SmartThings runtime.
@@ -31,9 +45,9 @@ metadata {
 void parse(description) {
 	// parse the lan message notification and pass it to the appropriate child
 	def notification = parseLanMessage description
-	// log.debug "parse: $notification"
+	// log debug, "parse: $notification"
 	String request = notification.header.split('\r\n')[0]
-	log.debug "parse: $request"
+	log debug, "parse: $request"
 	// NOTIFY path HTTP/1.1
 	def path = request.split('\\s+')[1].split('/')
 	String udn = path[1]
@@ -42,7 +56,7 @@ void parse(description) {
 		String notify = path[2]
 		child."$notify" notification
 	} else {
-		log.error "parse: $udn sibling not found"
+		log error, "parse: $udn sibling not found"
 	}
 }
 
