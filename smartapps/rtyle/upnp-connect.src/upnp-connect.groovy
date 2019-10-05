@@ -36,7 +36,7 @@ preferences {
 	input 'search', 'bool', defaultValue: true, title: 'Request a discovery search'
 	input 'create', 'bool', defaultValue: true, title: 'Create discovered devices'
 	input 'prefix', 'text', defaultValue: 'UPnP', required: false, title: 'Device label prefix'
-    input 'logLevel', 'number', defaultValue: '1', title: 'Log level [-1..4]', range: '-1..4'
+	input 'logLevel', 'number', defaultValue: '1', title: 'Log level [-1..4]', range: '-1..4'
 }
 
 private int getTrace() {0}
@@ -47,7 +47,7 @@ private int getError() {4}
 private void log(int level, String message, Throwable throwable = null) {
 	if (level > logLevel) {
 		log."${['trace', 'debug', 'info', 'warn', 'error'][level]}" message, throwable
-    }
+	}
 }
 
 private String getNamespace() {
