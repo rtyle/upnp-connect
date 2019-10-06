@@ -421,6 +421,7 @@ private void detach() {
 	['SwitchPower'ifelse(«Dimmable», Type, «, 'Dimming'»)].each {service ->
 		upnpUnsubscribe service
 	}
+	unschedule()
 }
 
 void install() {

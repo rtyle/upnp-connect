@@ -396,6 +396,7 @@ private void detach() {
 	['SwitchPower', 'Dimming'].each {service ->
 		upnpUnsubscribe service
 	}
+	unschedule()
 }
 
 void install() {
