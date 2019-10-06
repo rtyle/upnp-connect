@@ -124,9 +124,13 @@ void controlResponseSwitchPowerSetTarget(physicalgraph.device.HubResponse hubRes
 	controlResponse 'SwitchPower', 'SetTarget', hubResponse
 }
 
-void refresh() {
-	log debug, 'refresh'
+void refreshSwitchPower() {
+	log debug, 'refreshSwitchPower'
 	control 'SwitchPower', 'GetStatus'
+}
+
+void refresh() {
+	refreshSwitchPower()
 }
 
 void on() {
@@ -253,9 +257,11 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	} else {
 		def headers = message.headers
 		String sid = headers.sid.split(':')[1]
-		updateDataValue "sid$service", sid
-		unschedule "upnpSubscribe$service"	// success
-		refresh()
+		if (sid != getDataValue("sid$service")) {
+			updateDataValue "sid$service", sid
+			unschedule "upnpSubscribe$service"	// success
+			"refresh$service"()
+		}
 	}
 }
 
@@ -355,5 +361,5 @@ void update(String networkAddress_, String deviceAddress_) {
 
 void uninstall() {
 	log debug, "uninstall"
-	detach()
+		detach()
 }

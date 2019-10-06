@@ -148,10 +148,19 @@ void controlResponseDimmingSetLoadLevelTarget(physicalgraph.device.HubResponse h
 	controlResponse 'Dimming', 'SetLoadLevelTarget', hubResponse
 }
 
-void refresh() {
-	log debug, 'refresh'
-	control 'SwitchPower', 'GetStatus'
+void refreshDimming() {
+	log debug, 'refreshDimming'
 	control 'Dimming', 'GetLoadLevelStatus'
+}
+
+void refreshSwitchPower() {
+	log debug, 'refreshSwitchPower'
+	control 'SwitchPower', 'GetStatus'
+}
+
+void refresh() {
+	refreshSwitchPower()
+	refreshDimming()
 }
 
 void on() {
@@ -306,9 +315,11 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	} else {
 		def headers = message.headers
 		String sid = headers.sid.split(':')[1]
-		updateDataValue "sid$service", sid
-		unschedule "upnpSubscribe$service"	// success
-		refresh()
+		if (sid != getDataValue("sid$service")) {
+			updateDataValue "sid$service", sid
+			unschedule "upnpSubscribe$service"	// success
+			"refresh$service"()
+		}
 	}
 }
 
@@ -416,5 +427,5 @@ void update(String networkAddress_, String deviceAddress_) {
 
 void uninstall() {
 	log debug, "uninstall"
-	detach()
+		detach()
 }
