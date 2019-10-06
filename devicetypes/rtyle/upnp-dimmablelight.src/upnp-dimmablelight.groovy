@@ -313,11 +313,11 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 		log error, "upnpSubscribeResponse: $statusCode $reason"
 		runIn 60, "upnpSubscribe$service"	// unschedule on success
 	} else {
+		unschedule "upnpSubscribe$service"	// success
 		def headers = message.headers
 		String sid = headers.sid.split(':')[1]
 		if (sid != getDataValue("sid$service")) {
 			updateDataValue "sid$service", sid
-			unschedule "upnpSubscribe$service"	// success
 			"refresh$service"()
 		}
 	}
