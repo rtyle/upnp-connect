@@ -114,10 +114,10 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log error, "controlResponse: $statusCode $reason"
+		log error, "controlResponse: $service $statusCode $reason"
 		null
 	} else {
-		// log debug, "controlResponse: $message.body"
+		// log debug, "controlResponse: $service $message.body"
 		groovy.util.slurpersupport.GPathResult xml = parseXml message.body
 		Map args = [:]
 		xml.Body."${action}Response".'*'.each {node ->
@@ -331,7 +331,7 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log error, "upnpSubscribeResponse: $statusCode $reason"
+		log error, "upnpSubscribeResponse: $service $statusCode $reason"
 		runIn 60, "upnpSubscribe$service"	// unschedule on success
 	} else {
 		unschedule "upnpSubscribe$service"	// success
@@ -411,7 +411,7 @@ void upnpUnsubscribeResponse(String service, physicalgraph.device.HubResponse hu
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
-		log error, "upnpUnsubscribeResponse: $statusCode $reason"
+		log error, "upnpUnsubscribeResponse: $service $statusCode $reason"
 	} else {
 		updateDataValue "sid$service", ''
 	}
