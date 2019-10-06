@@ -103,7 +103,7 @@ private Map controlResponse(String service, String action, physicalgraph.device.
 	log debug, "controlResponse: $service, $action, $message.headers"
 	String response = message.header.split('\r\n')[0]
 	// HTTP/1.1 <statusCode> <reason>
-	def part = response.split('\\s+')
+	def part = response.split('\\s+', 3)
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
@@ -306,7 +306,7 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	log debug, "upnpSubscribeResponse: $service, $message.headers"
 	String response = message.header.split('\r\n')[0]
 	// HTTP/1.1 <statusCode> <reason>
-	def part = response.split('\\s+')
+	def part = response.split('\\s+', 3)
 	Integer statusCode = part[1].toInteger()
 	if (200 != statusCode) {
 		String reason = part[2]
