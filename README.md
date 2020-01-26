@@ -24,25 +24,20 @@ for your *SmartApps* and
 
 for your *Device Handlers*. Otherwise, one can just copy and paste this code.
 
-One should deploy the **UPnP (Connect)** SmartThings SmartApp to request a discovery search and begin automatic SmartThings Device creation.
-If the SmartThings cloud is flooded with many discovered devices, creation for some may fail.
-Request another discovery search by opening the SmartApp settings, turning on *Request a discovery search* and clicking *Save*.
-Repeat until all your devices are supported.
-Repeat again when new devices are added.
+One should deploy the **UPnP (Connect)** SmartThings SmartApp and change the settings to select the supported SmartThings device types to search for and begin the search (save these settings). The SmartApp will periodically perform such searches and collect candidates that might have SmartThings devices created for them. Use the SmartApp's settings again to select found candidates that you want this done for. When you save these settings, the SmartThings devices are created for the selected candidates. When you are done adding SmartThings devices you may turn search off or leave it on to continually monitor and adjust to changes on your hub's LAN…
 
 For each hosted service implementing supported UPnP devices on your LAN,
 a special SmartThings Device named **UPnP (Connect) MAC** will be created to support events coming from its host
 where **MAC** is the MAC address of that host.
 If the MAC address, IP address or port of such a service changes,
-*Request a discovery search* again from the **UPnP (Connect)** SmartApp.
-Repeat until all your SmartThings Devices are supported again.
+search again from the **UPnP (Connect)** SmartApp.
+Leave search on until all your SmartThings Devices are supported again.
 
-When UPnP devices are added to (or restarted on) your hub's LAN, they may advertise their presence without an explicit discovery search being requested. If their device URNs are supported, the result is the same: they will be (re)discovered.
+When UPnP devices are added to (or restarted on) your hub's LAN, they may advertise their presence without an explicit discovery search being requested. If their device URNs are supported and were requested, the result is the same: they will be (re)discovered.
   
 The **UPnP (Connect)** SmartApp will never remove any of its created SmartThings Devices until the SmartApp is removed.
 This includes the special **UPnP (Connect) MAC** SmartThings Devices.
 You can remove any of the **UPnP (Connect)** SmartApp's Devices manually if you want
 but if they still exist on your LAN they will be recreated automatically the next time they are discovered.
-If you don't want **UPnP (Connect)** to create any more discovered devices, turn off the *Create discovered devices* setting.
 
-**UPnP (Connect)** will add a prefix to the *friendlyName* of a UPnP device when creating/labeling a new SmartThings device. By default, this is 'UPnP '. This *Device label prefix* can be changed or even removed in the SmartApp's settings.
+**UPnP (Connect)** will add a prefix to the *friendlyName* of a UPnP device when creating/labeling a new SmartThings device. By default, this is 'UPnP '. This *Device label prefix* can be changed or even removed in the SmartApp's settings. Of course, the created device's label can later be edited to be anything you want using the SmartThings app or IDE.
