@@ -208,7 +208,7 @@ private void upnpSubscribe(String service) {
 				Host	: host,
 				CALLBACK: "<http://$hub/$udn/notify$service>",
 				NT		: 'upnp:event',
-				TIMEOUT	: 'Second-480',
+				TIMEOUT	: 'Second-960',
 			],
 		],
 		udn,
