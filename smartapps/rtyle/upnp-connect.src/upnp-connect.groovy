@@ -55,9 +55,9 @@ private String getUpnpNamespace() {
 
 private Map getSupportedCandidateTypeMap() {
 	Map map = [:]
-    // make sure urn values are of type String (not GString) because we will be comparing objects of type String
+    // make sure urn values are of type String (not GString) because we will be comparing them to objects of type String
     // while String and GString objects may compare (compareTo, ==) the same, they will not be equal
-    // note that, apparently, the contains method on a collection evaluates using equal, not == or compareTo!
+    // Apparently the contains method on a collection evaluates using equal, not == or compareTo!
 	['BinaryLight', 'DimmableLight'].each {name ->
 		map."$namespace\t$name" = [urn: "$upnpNamespace:$name:1".toString(), deviceHandler: {notUsed -> [namespace: namespace, name: "UPnP $name"]}]
 	}
@@ -213,12 +213,12 @@ void updated() {
 		selectedCandidates.collect{it.split("\t")[0]}.each {udn ->
 			if (rememberedDevice.containsKey(udn)) {
 				def remembered = rememberedDevice."$udn"
+				String hubId = remembered.hubId
 
 				// create the MAC identified child, if needed
 				String mac = remembered.mac
 				physicalgraph.app.DeviceWrapper macChild = getChildDevice mac
 				if (!macChild) {
-					String hubId = remembered.hubId
 					String label = name + ' ' + mac
 					log info, "updated: addChildDevice $namespace, $name, $mac, $hubId, [label: $label, completedSetup: true]"
 					addChildDevice namespace, name, mac, hubId, [label: label, completedSetup: true]
@@ -229,8 +229,8 @@ void updated() {
 				def device = parseXml(parseLanMessage(remembered.ssdpPathResponse).body).device
 				def deviceHandler = resolveDeviceHandler(urn, device)
 				String label = (prefix && !prefix.isEmpty() ? prefix + ' ' : '') + device.friendlyName.text()
-				log info, "updated: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, $remembered.hubId, [label: $label, data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $remembered.ssdpPathResponse]]"
-				physicalgraph.app.DeviceWrapper udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, remembered.hubId, [
+				log info, "updated: addChildDevice $deviceHandler.namespace, $deviceHandler.name, $udn, $hubId, [label: $label, data: [networkAddress: $remembered.networkAddress, deviceAddress: $remembered.deviceAddress, ssdpPath: $remembered.ssdpPath, description: $remembered.ssdpPathResponse]]"
+				physicalgraph.app.DeviceWrapper udnChild = addChildDevice deviceHandler.namespace, deviceHandler.name, udn, hubId, [
 					data : [
 						networkAddress	: remembered.networkAddress,
 						deviceAddress	: remembered.deviceAddress,
@@ -249,8 +249,11 @@ void updated() {
 		// filter remaining rememberedDevice map based on current state/settings
 		rememberedDevice.findAll{
 			String udn = it.key
-			String urn = it.value.ssdpUSN.urn
-			!requestedCandidateUrns.contains(urn) || {it.value.ssdpPathResponse && !resolveDeviceHandler(urn, parseXml(parseLanMessage(it.value.ssdpPathResponse).body).device)}()
+            def remembered = it.value
+			String urn = remembered.ssdpUSN.urn
+			!requestedCandidateUrns.contains(urn) || {
+				remembered.ssdpPathResponse && !resolveDeviceHandler(urn, parseXml(parseLanMessage(remembered.ssdpPathResponse).body).device)
+			}()
 		}.collect{
 			it.key
 		}.each{udn ->
@@ -258,7 +261,7 @@ void updated() {
 		}
 		ssdpSubscribe()
 		ssdpDiscover()
-		runEvery5Minutes(ssdpDiscover)
+		runEvery5Minutes ssdpDiscover
 	}
 }
 
