@@ -49,16 +49,19 @@ private String getNamespace() {
 private String getName() {
 	name()
 }
-private String upnpNamespace() {
+private String getUpnpNamespace() {
 	'schemas-upnp-org:device'
 }
 
 private Map getSupportedCandidateTypeMap() {
 	Map map = [:]
+    // make sure urn values are of type String (not GString) because we will be comparing objects of type String
+    // while String and GString objects may compare (compareTo, ==) the same, they will not be equal
+    // note that, apparently, the contains method on a collection evaluates using equal, not == or compareTo!
 	['BinaryLight', 'DimmableLight'].each {name ->
-		map."$namespace\t$name" = [urn: "${upnpNamespace()}:$name:1", deviceHandler: {notUsed -> [namespace: namespace, name: "UPnP $name"]}]
+		map."$namespace\t$name" = [urn: "$upnpNamespace:$name:1".toString(), deviceHandler: {notUsed -> [namespace: namespace, name: "UPnP $name"]}]
 	}
-	String name = 'Denon AVR'; map."$namespace\t$name" = [urn: "${upnpNamespace()}:MediaRenderer:1", deviceHandler: {device ->
+	String name = 'Denon AVR'; map."$namespace\t$name" = [urn: "$upnpNamespace:MediaRenderer:1".toString(), deviceHandler: {device ->
 		if ('Denon' == device.manufacturer.text())
 			[namespace: namespace, name: "UPnP $name"]
 		else
@@ -158,16 +161,17 @@ private void ssdpDiscovered(physicalgraph.app.EventWrapper e) {
 			addChildDevice namespace, name, mac, hubId, [label: label, completedSetup: true]
 		}
 
+		// update UDN identified child with discovered networkAddress and deviceAddress
 		log debug, "ssdpDiscovered: (getChildDevice $udn).update $discovered.networkAddress $discovered.deviceAddress"
 		udnChild.update discovered.networkAddress, discovered.deviceAddress
 	} else {
 		String urn = discovered.ssdpUSN.urn
-		if (!search || !requestedCandidateUrns.contains(urn)) {
-			// ignore discovered if we are not in search mode
-			// ignore discovered things we aren't interested in
-			log debug, "ssdpDiscovered: ignore $urn"
+		if (!search) {
+			log debug, "ssdpDiscovered: $urn ignored, not searching"
+        } else if (!(requestedCandidateUrns.contains(urn))) {
+			log debug, "ssdpDiscovered: $urn ignored, not one of $requestedCandidateUrns"
 		} else {
-			// remember what we have discovered so far and try get and ssdpPath response
+			// remember what we have discovered so far and try get an ssdpPath response
 			rememberedDevice."$udn" = discovered;
 			String target = decodeNetworkAddress(discovered.networkAddress) + ':' + decodeDeviceAddress(discovered.deviceAddress)
 			log debug, "ssdpDiscovered: GET http://$target${discovered.ssdpPath}"
@@ -239,7 +243,7 @@ void updated() {
 				udnChild.install()
 
 				// we can forget about this
-				rememberedDevice.remove(udn)
+				rememberedDevice.remove udn
 			}
 		}
 		// filter remaining rememberedDevice map based on current state/settings
@@ -282,7 +286,7 @@ def settingsPage() {
 			}
 		}
 	}
-	dynamicPage(name: 'settingsPage', refreshInterval: settings.discover ? 10 : 0, install: true, uninstall: true) {
+	dynamicPage(name: 'settingsPage', refreshInterval: search ? 10 : 0, install: true, uninstall: true) {
 		section {
 			input 'search', 'bool', title: 'Search for UPnP devices (and update created/associated SmartThings devices) periodically', defaultValue: false
 			input 'requestedCandidateTypes', 'enum', required: false, title: 'Select supported SmartThings device types to search for', multiple: true, options: supportedCandidateTypeMap.collect{key, value -> key}
