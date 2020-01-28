@@ -270,11 +270,11 @@ void installed() {
 }
 
 void uninstalled() {
-	getChildDevices().each({child ->
+	getChildDevices().each {child ->
 		log debug, "uninstalled: deleteChildDevice $child.deviceNetworkId"
 		child.uninstall()
 		deleteChildDevice child.deviceNetworkId
-	});
+	}
 }
 
 def settingsPage() {
