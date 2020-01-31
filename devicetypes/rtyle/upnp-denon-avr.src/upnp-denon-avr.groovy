@@ -2,7 +2,7 @@
 /**
  *	UPnP Denon AVR
  *
- *	Copyright 2019 Ross Tyler
+ *	Copyright 2020 Ross Tyler
  *
  *	Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *	in compliance with the License. You may obtain a copy of the License at:
@@ -15,31 +15,14 @@
 **/
 metadata {
 	definition (name: "UPnP Denon AVR", namespace: "rtyle", author: "Ross Tyler") {
-		capability 'Actuator'	// we have commands
-		capability 'Sensor'		// we have attributes
 		capability 'Refresh'
-		capability 'Switch'
 	}
-	tiles(scale: 2) {
-		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true, canChangeBackground: true){
-			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
-				attributeState "on", label:'${name}', action:"switch.off", icon:"st.Home.home30", backgroundColor:"#00A0DC", nextState:"turningOff"
-				attributeState "off", label:'${name}', action:"switch.on", icon:"st.Home.home30", backgroundColor:"#FFFFFF", nextState:"turningOn", defaultState: true
-				attributeState "turningOn", label:'Turning On', action:"switch.off", icon:"st.Home.home30", backgroundColor:"#00A0DC", nextState:"turningOn"
-				attributeState "turningOff", label:'Turning Off', action:"switch.on", icon:"st.Home.home30", backgroundColor:"#FFFFFF", nextState:"turningOff"
-			}
+	tiles() {
+		standardTile('refreshTile', null, decoration: 'flat') {
+			state 'default', label:'', action: 'refresh.refresh', icon:'st.secondary.refresh'
 		}
-		standardTile("explicitOn", "device.switch", width: 2, height: 2, decoration: "flat") {
-			state "default", label: "On", action: "switch.on", icon: "st.Home.home30", backgroundColor: "#ffffff"
-		}
-		standardTile("explicitOff", "device.switch", width: 2, height: 2, decoration: "flat") {
-			state "default", label: "Off", action: "switch.off", icon: "st.Home.home30", backgroundColor: "#ffffff"
-		}
-		standardTile("refresh", "device.power", inactiveLabel: false, decoration: "flat", width: 2, height: 2) {
-			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
-		}
-		main(["switch"])
-		details(["switch", "explicitOn", "explicitOff", 'refresh'])
+		main(['refreshTile'])
+		details(['refreshTile'])
 	}
 	preferences {
 		input 'logLevel', 'number', defaultValue: '1', title: 'Log level (-1..4: trace, debug, info, warn, error, none)', range: '-1..4'
@@ -57,92 +40,6 @@ private void log(int level, String message) {
 	}
 }
 
-private void control(String service, String action, Map args = null) {
-	log debug, "control: $service, $action, $args"
-	String path = getDataValue "controlPath$service"
-	String soapArgs = ''
-	args?.each {name, value ->
-		soapArgs += "<$name>$value</$name>"
-	}
-	String body = """\
-<?xml version='1.0'?>
-	<s:Envelope s:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/' xmlns:s='http://schemas.xmlsoap.org/soap/envelope/'>
-		<s:Body>
-			<u:$action xmlns:u='urn:schemas-upnp-org:service:$service:1'>
-				$soapArgs
-			</u:$action>
-		</s:Body>
-</s:Envelope>"""
-	sendHubCommand new physicalgraph.device.HubAction([
-			method	: 'POST',
-			path	: path,
-			headers	: [
-				Host			: host,
-				SOAPAction		: "'urn:schemas-upnp-org:service:$service:1#$action'",
-				'Content-Length': "${body.length()}",
-			],
-			body 	: body
-		],
-		device.deviceNetworkId,
-		[callback: "controlResponse$service$action"]
-	)
-}
-
-private Map controlResponse(String service, String action, physicalgraph.device.HubResponse hubResponse) {
-	def message = parseLanMessage hubResponse.description
-	log debug, "controlResponse: $service, $action, $message.headers"
-	String response = message.header.split('\r\n')[0]
-	// HTTP/1.1 <statusCode> <reason>
-	def part = response.split('\\s+', 3)
-	Integer statusCode = part[1].toInteger()
-	if (200 != statusCode) {
-		String reason = part[2]
-		log error, "controlResponse: $service $statusCode $reason"
-		null
-	} else {
-		// log debug, "controlResponse: $service $message.body"
-		groovy.util.slurpersupport.GPathResult xml = parseXml message.body
-		Map args = [:]
-		xml.Body."${action}Response".'*'.each {node ->
-			args."${node.name()}" = node.text()
-		}
-		args
-	}
-}
-
-void controlResponseSwitchPowerGetStatus(physicalgraph.device.HubResponse hubResponse) {
-	Map args = controlResponse 'SwitchPower', 'GetStatus', hubResponse
-	log debug, "controlResponseSwitchPowerGetStatus: $args"
-	if (args.containsKey('ResultStatus')) {
-		String value = '1' == args.ResultStatus ? 'on' : 'off'
-		log info, "controlResponseSwitchPowerGetStatus: sendEvent name: 'switch', value: $value"
-		sendEvent name: 'switch', value: value
-	}
-}
-
-void controlResponseSwitchPowerSetTarget(physicalgraph.device.HubResponse hubResponse) {
-	controlResponse 'SwitchPower', 'SetTarget', hubResponse
-}
-
-void refreshSwitchPower() {
-	log debug, 'refreshSwitchPower'
-	control 'SwitchPower', 'GetStatus'
-}
-
-void refresh() {
-	refreshSwitchPower()
-}
-
-void on() {
-	log debug, 'on'
-	control 'SwitchPower', 'SetTarget', [NewTargetValue: '1']
-}
-
-void off() {
-	log debug, 'off'
-	control 'SwitchPower', 'SetTarget', [NewTargetValue: '0']
-}
-
 private String getNetworkAddress() {
 	getDataValue 'networkAddress'
 }
@@ -154,6 +51,9 @@ private String getDeviceAddress() {
 }
 private void setDeviceAddress(String value) {
 	updateDataValue 'deviceAddress', value
+}
+private String getSsdpPath() {
+	getDataValue 'ssdpPath'
 }
 private String getDescription() {
 	getDataValue 'description'
@@ -174,6 +74,10 @@ private Integer decodeDeviceAddress(String deviceAddress) {
 	decodeHexadecimal deviceAddress
 }
 
+private String getHostHttp() {
+	decodeNetworkAddress(networkAddress) + ':80'
+}
+
 private String getHost() {
 	decodeNetworkAddress(networkAddress) + ':' + decodeDeviceAddress(deviceAddress)
 }
@@ -182,21 +86,59 @@ private String getHub() {
 	device.hub.getDataValue('localIP') + ':' + device.hub.getDataValue('localSrvPortTCP')
 }
 
-void notifySwitchPower(notification) {
-	// log debug, "notifySwitchPower: $notification.body"
-	groovy.util.slurpersupport.GPathResult xml = parseXml notification.body
-	String status = xml.property.Status.text()
-	if (status) {
-		String value = '1' == status ? 'on' : 'off'
-		log info, "notifySwitchPower: sendEvent name: 'switch', value: $value"
-		sendEvent name: 'switch', value: value
-	}
-}
+private List getZones() {[
+	'MainZone',
+	'Zone2',
+	'Zone3',
+]}
 
 void parse(event) {
 	log error, "parse: not expected: $event"
 }
 
+void refresh() {
+	log debug, 'refresh'
+    getChildDevices().each {zoneChild ->
+        zoneChild.refresh()
+    }
+}
+
+// Denon UPnP services are pretty much useless.
+// All actions will be handled through the Denon web interface.
+// Only some service (RenderingControl) notifications (mute, volume) are ever sent
+// and there are conditions where even these are not sent.
+// We subscribe only to take the opportunity to refresh on what notifications we do get.
+private List getServices() {[
+	"RenderingControl",
+    //	"ConnectionManager",
+    //	"AVTransport",
+]}
+
+void refreshRenderingControl() {
+	log debug, 'refreshRenderingControl'
+    refresh()
+}
+void refreshConnectionManager() {
+	log debug, 'refreshConnectionManager'
+    refresh()
+}
+void refreshAVTransport() {
+	log debug, 'refreshAVTransport'
+    refresh()
+}
+
+void notifyRenderingControl(notification) {
+	log debug, "notifyRenderingControl: $notification.body"
+    refresh()
+}
+void notifyConnectionManager(notification) {
+	log debug, "notifyConnectionManager: $notification.body"
+    refresh()
+}
+void notifyAVTransport(notification) {
+	log debug, "notifyAVTransport: $notification.body"
+    refresh()
+}
 private void upnpSubscribe(String service) {
 	String path = getDataValue "eventPath$service"
 	log debug, "upnpSubscribe: $service, $path"
@@ -208,7 +150,7 @@ private void upnpSubscribe(String service) {
 				Host	: host,
 				CALLBACK: "<http://$hub/$udn/notify$service>",
 				NT		: 'upnp:event',
-				TIMEOUT	: 'Second-480',
+				TIMEOUT	: 'Second-300',
 			],
 		],
 		udn,
@@ -227,7 +169,7 @@ private void resubscribe(String service) {
 			headers: [
 				Host	: host,
 				SID		: "uuid:$sid",
-				TIMEOUT	: 'Second-960',
+				TIMEOUT	: 'Second-300',
 			],
 		],
 		udn,
@@ -235,12 +177,24 @@ private void resubscribe(String service) {
 	)
 }
 
-void upnpSubscribeSwitchPower() {
-	upnpSubscribe 'SwitchPower'
+void upnpSubscribeRenderingControl() {
+	upnpSubscribe 'RenderingControl'
+}
+void upnpSubscribeConnectionManager() {
+	upnpSubscribe 'ConnectionManager'
+}
+void upnpSubscribeAVTransport() {
+	upnpSubscribe 'AVTransport'
 }
 
-void resubscribeSwitchPower() {
-	resubscribe 'SwitchPower'
+void resubscribeRenderingControl() {
+	resubscribe 'RenderingControl'
+}
+void resubscribeConnectionManager() {
+	resubscribe 'ConnectionManager'
+}
+void resubscribeAVTransport() {
+	resubscribe 'AVTransport'
 }
 
 private void upnpSubscribeResponse(String service, physicalgraph.device.HubResponse hubResponse) {
@@ -265,8 +219,14 @@ private void upnpSubscribeResponse(String service, physicalgraph.device.HubRespo
 	}
 }
 
-void upnpSubscribeResponseSwitchPower(physicalgraph.device.HubResponse hubResponse) {
-	upnpSubscribeResponse 'SwitchPower', hubResponse
+void upnpSubscribeResponseRenderingControl(physicalgraph.device.HubResponse hubResponse) {
+	upnpSubscribeResponse 'RenderingControl', hubResponse
+}
+void upnpSubscribeResponseConnectionManager(physicalgraph.device.HubResponse hubResponse) {
+	upnpSubscribeResponse 'ConnectionManager', hubResponse
+}
+void upnpSubscribeResponseAVTransport(physicalgraph.device.HubResponse hubResponse) {
+	upnpSubscribeResponse 'AVTransport', hubResponse
 }
 
 private void attach() {
@@ -275,7 +235,7 @@ private void attach() {
 	log debug, "attach: $body"
 	groovy.util.slurpersupport.GPathResult xml = parseXml message.body
 	groovy.util.slurpersupport.GPathResult serviceList = xml.device.serviceList
-	['SwitchPower'].each {service ->
+	services.each {service ->
 		groovy.util.slurpersupport.GPathResult action = serviceList.'*'.find {action ->
 			"urn:schemas-upnp-org:service:$service:1" == action.serviceType.text()
 		}
@@ -292,9 +252,9 @@ private void attach() {
 		// From now, our first period will elapse sometime before it should
 		// but subsequent ones will be close to clockwork.
 		// We don't have a lot of choices for the period (1, 5, 10, 15, 30, 60, 180 minutes).
-		// We will ask for an 16 minute subscription, assume that we get it and
-		// resubscribe every 10 minutes.
-		runEvery10Minutes "resubscribe$service"
+		// It seems we get a 5 minute subscription no matter what we ask for so
+		// resubscribe every 5 minutes.
+		runEvery5Minutes "resubscribe$service"
 	}
 }
 
@@ -332,13 +292,19 @@ void upnpUnsubscribeResponse(String service, physicalgraph.device.HubResponse hu
 	}
 }
 
-void upnpUnsubscribeResponseSwitchPower(physicalgraph.device.HubResponse hubResponse) {
-	upnpUnsubscribeResponse 'SwitchPower', hubResponse
+void upnpUnsubscribeResponseRenderingControl(physicalgraph.device.HubResponse hubResponse) {
+	upnpUnsubscribeResponse 'RenderingControl', hubResponse
+}
+void upnpUnsubscribeResponseConnectionManager(physicalgraph.device.HubResponse hubResponse) {
+	upnpUnsubscribeResponse 'ConnectionManager', hubResponse
+}
+void upnpUnsubscribeResponseAVTransport(physicalgraph.device.HubResponse hubResponse) {
+	upnpUnsubscribeResponse 'AVTransport', hubResponse
 }
 
 private void detach() {
 	log debug, "detach"
-	['SwitchPower'].each {service ->
+	services.each {service ->
 		upnpUnsubscribe service
 	}
 	unschedule()
@@ -347,6 +313,26 @@ private void detach() {
 void install() {
 	log debug, "install"
 	attach()
+    String namespace = 'rtyle'
+    String name = 'UPnP Denon AVR'
+    zones.each {zone ->
+    	String childName = "$name Zone"
+        String dni = "$device.deviceNetworkId\t$zone"
+        String label = "$device.label $zone"
+        log info, "install: addChildDevice $namespace, $childName, $dni, null, [label: $label, data: [networkAddress: $networkAddress, deviceAddress: $deviceAddress, ssdpPath: $ssdpPath, description: $description]]"
+        physicalgraph.app.DeviceWrapper zoneChild = addChildDevice namespace, childName, dni, null, [
+            data : [
+                networkAddress	: networkAddress,
+                deviceAddress	: deviceAddress,
+                ssdpPath		: ssdpPath,
+                description		: description,
+                zone			: zone,
+            ],
+            label				: label,
+            completedSetup		: true,
+        ]
+        zoneChild.install()
+    }
 }
 
 void update(String networkAddress_, String deviceAddress_) {
@@ -356,10 +342,18 @@ void update(String networkAddress_, String deviceAddress_) {
 		networkAddress = networkAddress_
 		deviceAddress = deviceAddress_
 		attach()
+        getChildDevices().each {zoneChild ->
+            zoneChild.update(networkAddress, deviceAddress)
+        }
 	}
 }
 
 void uninstall() {
 	log debug, "uninstall"
 	detach()
+	getChildDevices().each {zoneChild ->
+		zoneChild.uninstall()
+		log debug, "uninstall: deleteChildDevice $zoneChild.deviceNetworkId"
+		deleteChildDevice zoneChild.deviceNetworkId
+	}
 }
