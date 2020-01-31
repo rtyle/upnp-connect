@@ -309,7 +309,7 @@ private String decodeInputSource(String a, String b) {
 	}
 }
 void setInputSourceResponse(physicalgraph.device.HubResponse hubResponse) {
-	response hubResponse, 'setInputSource', {refreshResponse()}
+	response hubResponse, 'setInputSource', {refreshRequest()}
 }
 void setInputSource(String inputSource) {
 	log debug, "setInputSource: $source"
