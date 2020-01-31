@@ -98,9 +98,9 @@ void parse(event) {
 
 void refresh() {
 	log debug, 'refresh'
-    getChildDevices().each {zoneChild ->
-        zoneChild.refresh()
-    }
+	getChildDevices().each {zoneChild ->
+		zoneChild.refresh()
+	}
 }
 
 // Denon UPnP services are pretty much useless.
@@ -110,34 +110,34 @@ void refresh() {
 // We subscribe only to take the opportunity to refresh on what notifications we do get.
 private List getServices() {[
 	"RenderingControl",
-    //	"ConnectionManager",
-    //	"AVTransport",
+	//	"ConnectionManager",
+	//	"AVTransport",
 ]}
 
 void refreshRenderingControl() {
 	log debug, 'refreshRenderingControl'
-    refresh()
+	refresh()
 }
 void refreshConnectionManager() {
 	log debug, 'refreshConnectionManager'
-    refresh()
+	refresh()
 }
 void refreshAVTransport() {
 	log debug, 'refreshAVTransport'
-    refresh()
+	refresh()
 }
 
 void notifyRenderingControl(notification) {
 	log debug, "notifyRenderingControl: $notification.body"
-    refresh()
+	refresh()
 }
 void notifyConnectionManager(notification) {
 	log debug, "notifyConnectionManager: $notification.body"
-    refresh()
+	refresh()
 }
 void notifyAVTransport(notification) {
 	log debug, "notifyAVTransport: $notification.body"
-    refresh()
+	refresh()
 }
 private void upnpSubscribe(String service) {
 	String path = getDataValue "eventPath$service"
@@ -313,26 +313,26 @@ private void detach() {
 void install() {
 	log debug, "install"
 	attach()
-    String namespace = 'rtyle'
-    String name = 'UPnP Denon AVR'
-    zones.each {zone ->
-    	String childName = "$name Zone"
-        String dni = "$device.deviceNetworkId\t$zone"
-        String label = "$device.label $zone"
-        log info, "install: addChildDevice $namespace, $childName, $dni, null, [label: $label, data: [networkAddress: $networkAddress, deviceAddress: $deviceAddress, ssdpPath: $ssdpPath, description: $description]]"
-        physicalgraph.app.DeviceWrapper zoneChild = addChildDevice namespace, childName, dni, null, [
-            data : [
-                networkAddress	: networkAddress,
-                deviceAddress	: deviceAddress,
-                ssdpPath		: ssdpPath,
-                description		: description,
-                zone			: zone,
-            ],
-            label				: label,
-            completedSetup		: true,
-        ]
-        zoneChild.install()
-    }
+	String namespace = 'rtyle'
+	String name = 'UPnP Denon AVR'
+	zones.each {zone ->
+		String childName = "$name Zone"
+		String dni = "$device.deviceNetworkId\t$zone"
+		String label = "$device.label $zone"
+		log info, "install: addChildDevice $namespace, $childName, $dni, null, [label: $label, data: [networkAddress: $networkAddress, deviceAddress: $deviceAddress, ssdpPath: $ssdpPath, description: $description]]"
+		physicalgraph.app.DeviceWrapper zoneChild = addChildDevice namespace, childName, dni, null, [
+			data : [
+				networkAddress	: networkAddress,
+				deviceAddress	: deviceAddress,
+				ssdpPath		: ssdpPath,
+				description		: description,
+				zone			: zone,
+			],
+			label				: label,
+			completedSetup		: true,
+		]
+		zoneChild.install()
+	}
 }
 
 void update(String networkAddress_, String deviceAddress_) {
@@ -342,9 +342,9 @@ void update(String networkAddress_, String deviceAddress_) {
 		networkAddress = networkAddress_
 		deviceAddress = deviceAddress_
 		attach()
-        getChildDevices().each {zoneChild ->
-            zoneChild.update(networkAddress, deviceAddress)
-        }
+		getChildDevices().each {zoneChild ->
+			zoneChild.update(networkAddress, deviceAddress)
+		}
 	}
 }
 

@@ -17,51 +17,51 @@
 private List getInputSources() {[
 	// these sources may be renamed and have hardware inputs assigned to them
 	[id: 'CBLSAT'	, label: 'CBL/SAT'			],
-    [id: 'DVD'		, label: 'DVD'				],
-    [id: 'BD'		, label: 'Blu-ray'			],
-    [id: 'GAME'		, label: 'Game'				],
-    [id: 'MPLAY'	, label: 'Media Player'		],
-    [id: 'TV'		, label: 'TV Audio'			],
-    [id: 'AUX1'		, label: 'AUX1'				],
-    [id: 'AUX2'		, label: 'AUX2'				],
-    [id: 'CD'		, label: 'CD'				],
-    [id: 'PHONO'	, label: 'Phono'			],
-    // these sources cannot be renamed and require further configuration
-    [id: 'TUNER'	, label: 'Tuner'			],
-    [id: 'BT'		, label: 'Bluetooth'		],
-    [id: 'IPOD'		, label: 'iPod/USB'			],
-    [id: 'NETHOME'	, label: 'Online Music'		],
-    [id: 'SERVER'	, label: 'Media Server'		],
-    [id: 'IRP'		, label: 'Internet Radio'	],
+	[id: 'DVD'		, label: 'DVD'				],
+	[id: 'BD'		, label: 'Blu-ray'			],
+	[id: 'GAME'		, label: 'Game'				],
+	[id: 'MPLAY'	, label: 'Media Player'		],
+	[id: 'TV'		, label: 'TV Audio'			],
+	[id: 'AUX1'		, label: 'AUX1'				],
+	[id: 'AUX2'		, label: 'AUX2'				],
+	[id: 'CD'		, label: 'CD'				],
+	[id: 'PHONO'	, label: 'Phono'			],
+	// these sources cannot be renamed and require further configuration
+	[id: 'TUNER'	, label: 'Tuner'			],
+	[id: 'BT'		, label: 'Bluetooth'		],
+	[id: 'IPOD'		, label: 'iPod/USB'			],
+	[id: 'NETHOME'	, label: 'Online Music'		],
+	[id: 'SERVER'	, label: 'Media Server'		],
+	[id: 'IRP'		, label: 'Internet Radio'	],
 ]}
 
 metadata {
 	definition (name: "UPnP Denon AVR Zone", namespace: "rtyle", author: "Ross Tyler") {
-    	capability 'AudioMute'
-    	capability 'AudioVolume'
-        capability 'MediaInputSource'
+		capability 'AudioMute'
+		capability 'AudioVolume'
+		capability 'MediaInputSource'
 		capability 'Refresh'
-    	capability 'Switch'
+		capability 'Switch'
 
 		inputSources.each {inputSource ->
-        	command	"setInputSource$inputSource.id"
-        }
+			command	"setInputSource$inputSource.id"
+		}
 	}
 	tiles(scale: 2) {
-        multiAttributeTile(name: 'mainTile', type: 'generic', width:6, height:4) {
-            tileAttribute('device.switch', key: 'PRIMARY_CONTROL') {                
-                attributeState 'on'			, label: '${name}'		, action: 'switch.off'	, icon: 'st.Electronics.electronics19', backgroundColor: '#00A0DC', nextState: 'turningOff'
-                attributeState 'off'		, label: '${name}'		, action: 'switch.on'	, icon: 'st.Electronics.electronics19', backgroundColor: '#FFFFFF', nextState: 'turningOn', defaultState: true
-                attributeState 'turningOn'	, label: 'Turning On'	, action: 'switch.off'	, icon: 'st.Electronics.electronics19', backgroundColor: '#00A0DC', nextState: 'turningOn'
-                attributeState 'turningOff'	, label: 'Turning Off'	, action: 'switch.on'	, icon: 'st.Electronics.electronics19', backgroundColor: '#FFFFFF', nextState: 'turningOff'
-            }
-            tileAttribute('device.inputSource', key: 'SECONDARY_CONTROL') {
-                attributeState '', label: '${currentValue}'
-            }
-            tileAttribute('device.volume', key: 'SLIDER_CONTROL', range: '(0..100)') {
+		multiAttributeTile(name: 'mainTile', type: 'generic', width:6, height:4) {
+			tileAttribute('device.switch', key: 'PRIMARY_CONTROL') {
+				attributeState 'on'			, label: '${name}'		, action: 'switch.off'	, icon: 'st.Electronics.electronics19', backgroundColor: '#00A0DC', nextState: 'turningOff'
+				attributeState 'off'		, label: '${name}'		, action: 'switch.on'	, icon: 'st.Electronics.electronics19', backgroundColor: '#FFFFFF', nextState: 'turningOn'	, defaultState: true
+				attributeState 'turningOn'	, label: 'Turning On'	, action: 'switch.off'	, icon: 'st.Electronics.electronics19', backgroundColor: '#00A0DC', nextState: 'turningOn'
+				attributeState 'turningOff'	, label: 'Turning Off'	, action: 'switch.on'	, icon: 'st.Electronics.electronics19', backgroundColor: '#FFFFFF', nextState: 'turningOff'
+			}
+			tileAttribute('device.inputSource', key: 'SECONDARY_CONTROL') {
+				attributeState '', label: '${currentValue}'
+			}
+			tileAttribute('device.volume', key: 'SLIDER_CONTROL', range: '(0..100)') {
 				attributeState '', action: 'audio volume.setVolume'
-            }
-        }
+			}
+		}
 		standardTile('switchOnTile', 'device.switch', decoration: 'flat') {
 			state '', label: 'On', action: 'switch.on', icon: 'st.switches.switch.on', backgroundColor: '#ffffff'
 		}
@@ -69,10 +69,10 @@ metadata {
 			state '', label: 'Off', action: 'switch.off', icon: 'st.switches.switch.off', backgroundColor: '#ffffff'
 		}
 		standardTile('muteTile', 'device.mute', decoration: 'flat') {
-            state 'muted'	, label: '${name}'	, action: 'audio mute.unmute'	, icon: 'st.custom.sonos.muted'		, backgroundColor: '#00A0DC', nextState: 'unmuting'
-            state 'unmuted'	, label: '${name}'	, action: 'audio mute.mute'		, icon: 'st.custom.sonos.unmuted'	, backgroundColor: '#FFFFFF', nextState: 'muting', defaultState: true
-            state 'muting'	, label: 'Muting'	, action: 'audio mute.unmute'	, icon: 'st.custom.sonos.muted'		, backgroundColor: '#00A0DC', nextState: 'muting'
-            state 'unmuting', label: 'Unmuting'	, action: 'audio mute.mute'		, icon: 'st.custom.sonos.unmuted'	, backgroundColor: '#FFFFFF', nextState: 'unmuting'
+			state 'muted'	, label: '${name}'	, action: 'audio mute.unmute'	, icon: 'st.custom.sonos.muted'		, backgroundColor: '#00A0DC', nextState: 'unmuting'
+			state 'unmuted'	, label: '${name}'	, action: 'audio mute.mute'		, icon: 'st.custom.sonos.unmuted'	, backgroundColor: '#FFFFFF', nextState: 'muting'	, defaultState: true
+			state 'muting'	, label: 'Muting'	, action: 'audio mute.unmute'	, icon: 'st.custom.sonos.muted'		, backgroundColor: '#00A0DC', nextState: 'muting'
+			state 'unmuting', label: 'Unmuting'	, action: 'audio mute.mute'		, icon: 'st.custom.sonos.unmuted'	, backgroundColor: '#FFFFFF', nextState: 'unmuting'
 		}
 		standardTile('muteMuteTile', 'device.mute', decoration: 'flat') {
 			state '', label: 'Mute', action: 'audio mute.mute', icon: 'st.custom.sonos.unmuted', backgroundColor: '#ffffff'
@@ -83,11 +83,11 @@ metadata {
 		standardTile('refreshTile', null, decoration: 'flat') {
 			state '', label: 'Refresh', action: 'refresh.refresh', icon:'st.secondary.refresh'
 		}
-        inputSources.each {inputSource ->
-        	standardTile(inputSource.id, null, decoration: 'flat') {
-            	state '', label: inputSource.label, action: "setInputSource$inputSource.id"
-            }
-        }
+		inputSources.each {inputSource ->
+			standardTile(inputSource.id, null, decoration: 'flat') {
+				state '', label: inputSource.label, action: "setInputSource$inputSource.id"
+			}
+		}
 		main(['mainTile'])
 		details(['mainTile', 'switchOnTile', 'switchOffTile', 'muteTile', 'muteMuteTile', 'muteUnmuteTile', 'volumeTile', 'refreshTile'] + inputSources.collect{it.id})
 	}
@@ -159,7 +159,7 @@ void parse(event) {
 
 void sendEvent_(Map args) {
 	log debug, "sendEvent $args"
-    sendEvent args
+	sendEvent args
 }
 
 void response(physicalgraph.device.HubResponse hubResponse, String command, Closure success) {
@@ -173,32 +173,31 @@ void response(physicalgraph.device.HubResponse hubResponse, String command, Clos
 		String reason = part[2]
 		log error, "${command}Response: $statusCode $reason"
 	} else {
-        success(message)
+		success(message)
 	}
 }
 
 void refreshResponse(physicalgraph.device.HubResponse hubResponse) {
 	response hubResponse, 'refresh', {message ->
-    	def item = parseXml message.body
-        sendEvent_ name: 'switch', value: 'ON' == item.ZonePower.value.text()	? 'on'		: 'off'
-        sendEvent_ name: 'mute'	, value: 'on' == item.Mute.value.text()			? 'muted'	: 'unmuted'
-        sendEvent_ name: 'volume', value: decodeVolume(item.MasterVolume.text())
-        sendEvent_ name: 'inputSource', value: decodeInputSource(item.InputFuncSelect.text(), item.NetFuncSelect.text())
+		def item = parseXml message.body
+		sendEvent_ name: 'switch'		, value: 'ON' == item.ZonePower.value.text()	? 'on'		: 'off'
+		sendEvent_ name: 'mute'			, value: 'on' == item.Mute.value.text()			? 'muted'	: 'unmuted'
+		sendEvent_ name: 'volume'		, value: decodeVolume(item.MasterVolume.text())
+		sendEvent_ name: 'inputSource'	, value: decodeInputSource(item.InputFuncSelect.text(), item.NetFuncSelect.text())
 	}
 }
 private void refreshRequest() {
 	log debug, "refreshRequest: curl -X GET http://$hostHttp/goform/formMainZone_MainZoneXml.xml?ZoneName=$zone"
-	// curl -X GET http://$hostHttp/goform/formMainZone_MainZoneXml.xml?ZoneName=$zone
 	sendHubCommand new physicalgraph.device.HubAction([
-            method: 'GET',
-            path: "/goform/formMainZone_MainZoneXml.xml?ZoneName=$zone",
-            headers: [
-            	Host: hostHttp,
-            ],
-        ],
-        device.deviceNetworkId,
-        [callback: "refreshResponse"],
-    )
+			method: 'GET',
+			path: "/goform/formMainZone_MainZoneXml.xml?ZoneName=$zone",
+			headers: [
+				Host: hostHttp,
+			],
+		],
+		device.deviceNetworkId,
+		[callback: "refreshResponse"],
+	)
 }
 void refresh() {
 	refreshRequest()
@@ -207,18 +206,18 @@ void refresh() {
 private void request(String command, String form) {
 	// AVR expects urlencoded form to be in body (instead of appended to path)
 	log debug, "${command}Request: curl -d \"ZoneName=$zone&cmd0=Put$form\" -X POST http://$hostHttp/MainZone/index.put.asp"
-    sendHubCommand new physicalgraph.device.HubAction([
-            method: 'POST',
-            path: "/MainZone/index.put.asp",
-            headers: [
-            	Host: hostHttp,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            ],
-            body: "ZoneName=$zone&cmd0=Put$form",
-        ],
-        device.deviceNetworkId,
-        [callback: "${command}Response"],
-    )
+	sendHubCommand new physicalgraph.device.HubAction([
+			method: 'POST',
+			path: "/MainZone/index.put.asp",
+			headers: [
+				Host: hostHttp,
+				'Content-Type': 'application/x-www-form-urlencoded'
+			],
+			body: "ZoneName=$zone&cmd0=Put$form",
+		],
+		device.deviceNetworkId,
+		[callback: "${command}Response"],
+	)
 }
 
 void onResponse(physicalgraph.device.HubResponse hubResponse) {
@@ -236,35 +235,34 @@ void off() {
 
 private String encodeVolume_(Integer volume) {
 	// 0-100 -> -80..18 with .5 precision
-    // to match AVR monitor display (not front panel, which is ~2 less)
-    if (2 > volume)
-    	-80
-    else
-    	(2 * (volume - 2 - 80)) / 2.0f
+	// to match AVR monitor display (not front panel, which is ~2 less)
+	if (2 > volume)
+		-80
+	else
+		(2 * (volume - 2 - 80)) / 2.0f
 }
 private String encodeVolume(Integer volume) {
 	String _ = encodeVolume_ volume
-    log debug, "encodeVolume: $volume -> $_"
-    _
+	log debug, "encodeVolume: $volume -> $_"
+	_
 }
 private Integer decodeVolume_(Float volume) {
 	// -80..18 -> 0-100
-    if (-80 >= volume)
-    	0
+	if (-80 >= volume)
+		0
 	else
-    	volume + 80 + 2
+		volume + 80 + 2
 }
 private Integer decodeVolume(Float volume) {
 	Integer _ = decodeVolume_ volume
-    log debug, "decodeVolume: $volume -> $_"
-    _
+	log debug, "decodeVolume: $volume -> $_"
+	_
 }
 private Integer decodeVolume(String volume) {
-	if (volume.isFloat()) {
-    	decodeVolume(volume.toFloat())
-    } else {
+	if (volume.isFloat())
+		decodeVolume volume.toFloat()
+	else
 		0
-    }
 }
 void volumeResponse(physicalgraph.device.HubResponse hubResponse) {
 	response hubResponse, 'volume', {refreshRequest()}
@@ -292,31 +290,30 @@ void unmute() {
 	request 'unmute', 'VolumeMute%2fOFF'
 }
 void setMute(String mute) {
-	if ('muted' == mute) {
-    	mute()
-    } else {
-    	unmute()
-    }
+	if ('muted' == mute)
+		mute()
+	else
+		unmute()
 }
 
 private String decodeInputSource(String a, String b) {
 	if ('Online Music' != a) {
-    	a
-    } else {
-    	switch (b) {
-        	case 'SERVER': return 'Media Server'
-            case 'IRADIO': return 'Internet Radio'
-            case 'NET'	 :
-            default		 : return 'Online Music'
-        }
-    }
+		a
+	} else {
+		switch (b) {
+			case 'SERVER': return 'Media Server'
+			case 'IRADIO': return 'Internet Radio'
+			case 'NET'	 :
+			default		 : return 'Online Music'
+		}
+	}
 }
 void setInputSourceResponse(physicalgraph.device.HubResponse hubResponse) {
-	response hubResponse, 'setInputSource', {refreshRequest()}
+	response hubResponse, 'setInputSource', {refreshResponse()}
 }
 void setInputSource(String inputSource) {
 	log debug, "setInputSource: $source"
-    request 'setInputSource', "Zone_InputFunction%2f$inputSource"
+	request 'setInputSource', "Zone_InputFunction%2f$inputSource"
 }
 void setInputSourceCBLSAT	() {setInputSource('SAT%2FCBL'	)}
 void setInputSourceDVD		() {setInputSource('DVD'		)}
