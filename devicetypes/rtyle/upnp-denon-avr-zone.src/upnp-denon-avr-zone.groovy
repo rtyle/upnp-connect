@@ -14,6 +14,9 @@
  *	for the specific language governing permissions and limitations under the License.
 **/
 
+// *WARNING*
+// this code has been developed and tested against the Denon AVR X4100W model only
+
 private List getInputSources() {[
 	// these sources may be renamed and have hardware inputs assigned to them
 	[id: 'CBLSAT'	, label: 'CBL/SAT'			],
