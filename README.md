@@ -14,7 +14,7 @@ Which correspond to
 
 A companion project is [upnp-things](https://www.github.com/rtyle/upnp-things) which puts a UPnP face on such things. Together, these projects may be used to replace SmartThings to [Legrand Adorne LC7001 hub](https://www.legrand.us/adorne/products/wireless-whole-house-lighting-controls/lc7001.aspx) integration through Samsung’s ARTIK Cloud. Samsung has abandoned the ARTIK Cloud and Legrand has no plans to provide an alternative. This is an alternative.
 
-OCF UPnP MediaRenderer support is limited to the Denon AVR X4100W. Here UPnP is only used for discovery. A Device is created for each AVR zone and control is given to turn the zone on/off, set the volume and select the input source.
+OCF UPnP MediaRenderer support is limited to the [Denon AVR X4100W](https://usa.denon.com/us/product/hometheater/receivers/avrx4100w). Here UPnP is only used for discovery. A Device is created for each AVR zone and control is given to turn the zone on/off, set the volume and select the input source.
 
 Using the SmartThings IDE, one can integrate this repository and *Execute Update* with
 
