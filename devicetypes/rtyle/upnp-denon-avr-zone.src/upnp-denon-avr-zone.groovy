@@ -64,6 +64,10 @@ metadata {
 			tileAttribute('device.volume', key: 'SLIDER_CONTROL', range: '(0..100)') {
 				attributeState '', action: 'audio volume.setVolume'
 			}
+			tileAttribute("device.volume", key: "VALUE_CONTROL") {
+				attributeState 'VALUE_UP'	, action: 'audio volume.volumeUp'
+				attributeState 'VALUE_DOWN'	, action: 'audio volume.volumeDown'
+			}
 		}
 		standardTile('switchOnTile', 'device.switch', decoration: 'flat') {
 			state '', label: 'On', action: 'switch.on', icon: 'st.switches.switch.on', backgroundColor: '#ffffff'
