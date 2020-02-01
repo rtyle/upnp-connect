@@ -164,12 +164,12 @@ void parse(event) {
 	log error, "parse: not expected: $event"
 }
 
-void sendEvent_(Map args) {
+private void sendEvent_(Map args) {
 	log debug, "sendEvent $args"
 	sendEvent args
 }
 
-void response(physicalgraph.device.HubResponse hubResponse, String command, Closure success) {
+private void response(physicalgraph.device.HubResponse hubResponse, String command, Closure success) {
 	def message = parseLanMessage hubResponse.description
 	log debug, "${command}Response: $message.headers $message.body"
 	String response = message.header.split('\r\n')[0]
