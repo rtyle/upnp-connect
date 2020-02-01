@@ -5,6 +5,7 @@ The SmartThings hub is used discover and communicate with these devices.
 Currently, the only device UPnP URNs that are supported are
 * schemas-upnp-org:device:BinaryLight:1
 * schemas-upnp-org:device:DimmableLight:1
+* schemas-upnp-org:device:MediaRenderer:1
 
 Which correspond to
 * [OCF UPnP BinaryLight](http://upnp.org/specs/ha/UPnP-ha-BinaryLight-v1-Device.pdf)
